@@ -1,0 +1,2630 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rotom-Dex — Mon Équipe Pokémon Soleil</title>
+  <meta name="description"
+    content="Dashboard interactif de l'équipe Pokémon pour Pokémon Soleil — Aventure, Arbre de Combat, Compétitif." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ══════════════════════════════════════════
+       TOKENS & RESET
+    ══════════════════════════════════════════ */
+    :root {
+      --red: #e8212a;
+      --red-dark: #b51920;
+      --orange: #f5822a;
+      --yellow: #ffd246;
+      --cream: #fff8f0;
+      --white: #ffffff;
+      --dark: #1a0a00;
+      --grey: #5c3d2e;
+      --light-bg: #ffeedd;
+      --card-bg: #ffffff;
+      --shadow: 0 6px 24px rgba(230, 80, 0, .15);
+      --radius: 20px;
+      --radius-sm: 12px;
+      --font: 'Nunito', sans-serif;
+      --font-h: 'Baloo 2', cursive;
+
+      /* Type colours */
+      --t-normal: #A8A878;
+      --t-feu: #F08030;
+      --t-eau: #6890F0;
+      --t-plante: #78C850;
+      --t-electrik: #F8D030;
+      --t-glace: #98D8D8;
+      --t-combat: #C03028;
+      --t-poison: #A040A0;
+      --t-sol: #E0C068;
+      --t-vol: #A890F0;
+      --t-psy: #F85888;
+      --t-insecte: #A8B820;
+      --t-roche: #B8A038;
+      --t-spectre: #705898;
+      --t-dragon: #7038F8;
+      --t-tenebres: #705848;
+      --t-acier: #B8B8D0;
+      --t-fee: #EE99AC;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--light-bg);
+      color: var(--dark);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ══════════════════════════════════════════
+       BACKGROUND PATTERN
+    ══════════════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(245, 130, 42, .12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(232, 33, 42, .10) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='28' stroke='%23f5822a' stroke-width='1' fill='none' opacity='0.04'/%3E%3Cline x1='2' y1='30' x2='58' y2='30' stroke='%23f5822a' stroke-width='0.5' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: auto, auto, 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ══════════════════════════════════════════
+       HEADER / NAV
+    ══════════════════════════════════════════ */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+      box-shadow: 0 4px 20px rgba(180, 0, 0, .35);
+      padding: 0 2rem;
+    }
+
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      height: 72px;
+    }
+
+    .rotom-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--yellow);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1.6rem;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, .25), 0 4px 12px rgba(0, 0, 0, .2);
+      animation: pulse-rotom 2.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse-rotom {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, .25), 0 4px 12px rgba(0, 0, 0, .2);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(255, 220, 70, .4), 0 4px 20px rgba(0, 0, 0, .3);
+      }
+    }
+
+    header h1 {
+      font-family: var(--font-h);
+      color: var(--white);
+      font-size: 1.6rem;
+      letter-spacing: .5px;
+      flex: 1;
+    }
+
+    header h1 span {
+      color: var(--yellow);
+    }
+
+    nav {
+      display: flex;
+      gap: .5rem;
+    }
+
+    nav a {
+      color: rgba(255, 255, 255, .8);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: .85rem;
+      padding: .45rem 1rem;
+      border-radius: 50px;
+      border: 2px solid transparent;
+      transition: all .2s;
+      letter-spacing: .3px;
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: var(--yellow);
+      border-color: var(--yellow);
+      background: rgba(255, 220, 70, .1);
+    }
+
+    /* ══════════════════════════════════════════
+       DAY/NIGHT WIDGET
+    ══════════════════════════════════════════ */
+    .day-night-widget {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(255, 255, 255, .12);
+      border: 1.5px solid rgba(255, 255, 255, .2);
+      border-radius: 50px;
+      padding: .35rem .9rem;
+      flex-shrink: 0;
+      backdrop-filter: blur(6px);
+      transition: background .5s;
+    }
+
+    .day-night-widget.night {
+      background: rgba(20, 10, 60, .35);
+      border-color: rgba(160, 140, 255, .35);
+    }
+
+    .dn-icon {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .dn-time {
+      font-family: var(--font-h);
+      font-size: .95rem;
+      color: #fff;
+      letter-spacing: .5px;
+      font-weight: 700;
+    }
+
+    .dn-label {
+      font-size: .7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: rgba(255, 255, 255, .7);
+    }
+
+    /* ══════════════════════════════════════════
+       MAIN LAYOUT
+    ══════════════════════════════════════════ */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION HEADERS
+    ══════════════════════════════════════════ */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .section-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .section-badge::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 3px solid currentColor;
+      opacity: .3;
+    }
+
+    .badge-aventure {
+      background: linear-gradient(135deg, #f5822a, #ffd246);
+      color: #c05000;
+    }
+
+    .badge-combat {
+      background: linear-gradient(135deg, #e8212a, #f5822a);
+      color: #fff;
+    }
+
+    .badge-competitif {
+      background: linear-gradient(135deg, #7038F8, #e8212a);
+      color: #fff;
+    }
+
+    .section-title {
+      font-family: var(--font-h);
+      font-size: 1.8rem;
+      line-height: 1;
+    }
+
+    .section-subtitle {
+      font-size: .85rem;
+      color: var(--grey);
+      font-weight: 600;
+      margin-top: .2rem;
+    }
+
+    .section-divider {
+      height: 4px;
+      border-radius: 4px;
+      margin-bottom: 2.5rem;
+    }
+
+    .s1-divider {
+      background: linear-gradient(90deg, var(--orange), var(--yellow), transparent);
+    }
+
+    .s2-divider {
+      background: linear-gradient(90deg, var(--red), var(--orange), transparent);
+    }
+
+    .s3-divider {
+      background: linear-gradient(90deg, #7038F8, var(--red), transparent);
+    }
+
+    section {
+      margin-bottom: 5rem;
+    }
+
+    /* ══════════════════════════════════════════
+       CARD GRID
+    ══════════════════════════════════════════ */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .card-grid.detailed {
+      grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+    }
+
+    /* ══════════════════════════════════════════
+       POKÉMON CARD — BASE
+    ══════════════════════════════════════════ */
+    .poke-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+      cursor: default;
+      position: relative;
+      border: 2px solid rgba(245, 130, 42, .12);
+    }
+
+    .poke-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 16px 40px rgba(230, 80, 0, .25);
+      border-color: rgba(245, 130, 42, .4);
+    }
+
+    /* Sprite container */
+    .card-sprite {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 80px;
+      padding-bottom: 0;
+      position: relative;
+      margin-top: -10px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    @keyframes sprite-fadein {
+      from {
+        opacity: 0;
+        transform: translateY(6px) scale(.92);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-sprite img {
+      max-height: 80px;
+      max-width: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .25));
+      opacity: 0;
+      transition: transform .3s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .card-sprite img.loaded {
+      animation: sprite-fadein .35s ease forwards;
+    }
+
+    .poke-card:hover .card-sprite img {
+      transform: translateY(-4px) scale(1.08);
+    }
+
+    /* Card header stripe */
+    .card-head {
+      padding: .9rem 1rem .8rem;
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-head::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      opacity: 1;
+    }
+
+    .card-head::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .15);
+    }
+
+    .poke-number {
+      font-size: .72rem;
+      font-weight: 800;
+      color: rgba(255, 255, 255, .7);
+      font-family: var(--font-h);
+      position: relative;
+      z-index: 1;
+    }
+
+    .poke-name {
+      font-family: var(--font-h);
+      font-size: 1.05rem;
+      color: #fff;
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+    }
+
+    .poke-types {
+      display: flex;
+      gap: .35rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .type-badge {
+      font-size: .62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: #fff;
+      padding: .2rem .55rem;
+      border-radius: 50px;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+      background: rgba(0, 0, 0, .25);
+      border: 1.5px solid rgba(255, 255, 255, .3);
+    }
+
+    /* Card body */
+    .card-body {
+      padding: .9rem 1rem 1rem;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: baseline;
+      gap: .4rem;
+      margin-bottom: .38rem;
+      font-size: .82rem;
+    }
+
+    .info-label {
+      font-weight: 800;
+      color: var(--orange);
+      min-width: 60px;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .info-value {
+      color: var(--dark);
+      font-weight: 600;
+    }
+
+    /* Location badge (Aventure) */
+    .location-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--grey);
+      background: rgba(245, 130, 42, .08);
+      border: 1px solid rgba(245, 130, 42, .2);
+      border-radius: 50px;
+      padding: .18rem .6rem;
+      margin-bottom: .5rem;
+    }
+
+    /* Moves */
+    .moves-label {
+      font-weight: 800;
+      color: var(--orange);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin: .55rem 0 .3rem;
+    }
+
+    .moves-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .35rem;
+    }
+
+    .move-chip {
+      background: var(--light-bg);
+      border: 1.5px solid rgba(245, 130, 42, .2);
+      border-radius: 50px;
+      padding: .25rem .65rem;
+      font-size: .74rem;
+      font-weight: 700;
+      color: var(--grey);
+      text-align: center;
+      transition: all .2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .poke-card:hover .move-chip {
+      background: #fff4e8;
+      border-color: rgba(245, 130, 42, .45);
+    }
+
+    /* EVs row */
+    .evs-row {
+      margin: .4rem 0;
+    }
+
+    .evs-label {
+      font-weight: 800;
+      color: var(--orange);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: .3rem;
+    }
+
+    .ev-bars {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+    }
+
+    .ev-chip {
+      font-size: .7rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--red), var(--orange));
+      color: #fff;
+      padding: .15rem .5rem;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+    }
+
+    .ev-stat {
+      opacity: .8;
+    }
+
+    .ev-val {
+      font-weight: 900;
+    }
+
+    /* ══════════════════════════════════════════
+       CHECKLIST (Combat & Compétitif)
+    ══════════════════════════════════════════ */
+    .card-checklist {
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+      margin-top: .7rem;
+      padding-top: .6rem;
+      border-top: 1.5px dashed rgba(245, 130, 42, .2);
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--grey);
+      cursor: pointer;
+      user-select: none;
+      /* Generous tap target */
+      padding: .38rem .65rem;
+      min-height: 36px;
+      border-radius: 50px;
+      border: 1.5px solid rgba(245, 130, 42, .2);
+      background: rgba(245, 130, 42, .04);
+      transition: all .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .check-item:hover,
+    .check-item:active {
+      border-color: rgba(245, 130, 42, .5);
+      background: rgba(245, 130, 42, .1);
+    }
+
+    .check-item input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--orange);
+      border-radius: 5px;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all .15s;
+    }
+
+    .check-item input[type="checkbox"]:checked {
+      background: var(--orange);
+      border-color: var(--orange);
+    }
+
+    .check-item input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 0px;
+      width: 5px;
+      height: 9px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+
+    .check-item.done {
+      border-color: rgba(100, 200, 100, .5);
+      background: rgba(100, 200, 100, .08);
+      color: #3a7a3a;
+    }
+
+    .check-item.done input[type="checkbox"] {
+      border-color: #5cb85c;
+      background: #5cb85c;
+    }
+
+    /* ══════════════════════════════════════════
+       TYPE WEAKNESS ANALYZER BANNER
+    ══════════════════════════════════════════ */
+    .type-analysis {
+      margin-top: 1.4rem;
+      background: rgba(255, 255, 255, .7);
+      border: 1.5px solid rgba(245, 130, 42, .2);
+      border-radius: var(--radius-sm);
+      padding: .9rem 1.2rem;
+      backdrop-filter: blur(6px);
+    }
+
+    .type-analysis-title {
+      font-family: var(--font-h);
+      font-size: .95rem;
+      color: var(--grey);
+      margin-bottom: .65rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+
+    .weakness-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+    }
+
+    .weakness-chip {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+      font-size: .68rem;
+      font-weight: 800;
+      color: #fff;
+      padding: .2rem .55rem;
+      border-radius: 50px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+    }
+
+    .weakness-chip .wk-count {
+      background: rgba(0, 0, 0, .3);
+      border-radius: 50px;
+      padding: .05rem .35rem;
+      font-size: .65rem;
+    }
+
+    /* ══════════════════════════════════════════
+       EMPTY CARD PLACEHOLDER
+    ══════════════════════════════════════════ */
+    .empty-card .card-head {
+      background: linear-gradient(135deg, #ddd 0%, #bbb 100%) !important;
+    }
+
+    .empty-card .poke-name {
+      color: rgba(255, 255, 255, .6);
+      font-style: italic;
+    }
+
+    .empty-card .card-body {
+      opacity: .45;
+    }
+
+    .empty-card .move-chip {
+      background: #f0f0f0;
+      border-color: #ddd;
+      color: #aaa;
+    }
+
+    /* ══════════════════════════════════════════
+       POKÉBALL COUNTER
+    ══════════════════════════════════════════ */
+    .pokeball-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--red);
+      color: #fff;
+      border-radius: 50px;
+      padding: .3rem .9rem;
+      font-size: .82rem;
+      font-weight: 800;
+      margin-left: auto;
+      box-shadow: 0 3px 10px rgba(232, 33, 42, .3);
+    }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--grey);
+      font-size: .8rem;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer span {
+      color: var(--red);
+    }
+
+    /* ══════════════════════════════════════════
+       SCROLLBAR
+    ══════════════════════════════════════════ */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--light-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--orange);
+      border-radius: 4px;
+    }
+
+    /* ══════════════════════════════════════════
+       BOTTOM NAV (mobile)
+    ══════════════════════════════════════════ */
+    .bottom-nav {
+      display: none;
+    }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE — TABLET
+    ══════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+
+      .card-grid.detailed {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE — MOBILE
+    ══════════════════════════════════════════ */
+    @media (max-width: 600px) {
+
+      /* Compact header */
+      header {
+        padding: 0 1rem;
+      }
+
+      .header-inner {
+        height: 56px;
+        gap: .75rem;
+      }
+
+      .rotom-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.2rem;
+      }
+
+      header h1 {
+        font-size: 1.05rem;
+      }
+
+      /* Hide desktop nav, show bottom nav */
+      nav {
+        display: none;
+      }
+
+      .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        background: linear-gradient(135deg, var(--red-dark) 0%, var(--red) 100%);
+        box-shadow: 0 -4px 20px rgba(180, 0, 0, .4);
+        border-top: 1.5px solid rgba(255, 255, 255, .12);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      .bottom-nav a {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: .15rem;
+        padding: .6rem .25rem;
+        text-decoration: none;
+        color: rgba(255, 255, 255, .65);
+        font-size: .62rem;
+        font-weight: 800;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+        transition: all .18s;
+        -webkit-tap-highlight-color: transparent;
+        border-top: 3px solid transparent;
+      }
+
+      .bottom-nav a .bn-icon {
+        font-size: 1.35rem;
+        line-height: 1;
+        transition: transform .2s cubic-bezier(.34, 1.56, .64, 1);
+      }
+
+      .bottom-nav a.active {
+        color: var(--yellow);
+        border-top-color: var(--yellow);
+      }
+
+      .bottom-nav a.active .bn-icon {
+        transform: scale(1.18) translateY(-2px);
+      }
+
+      /* Reduce day/night label on small screens */
+      .dn-label {
+        display: none;
+      }
+
+      .dn-time {
+        font-size: .82rem;
+      }
+
+      /* Single column cards */
+      .card-grid,
+      .card-grid.detailed {
+        grid-template-columns: 1fr;
+      }
+
+      /* Tighter section spacing */
+      section {
+        margin-bottom: 3rem;
+      }
+
+      main {
+        padding: 1.5rem 1rem 5.5rem;
+      }
+
+      /* Slightly smaller section title */
+      .section-title {
+        font-size: 1.4rem;
+      }
+
+      .section-badge {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+
+      /* Card tweaks */
+      .card-body {
+        padding: .75rem .85rem .85rem;
+      }
+
+      .info-row {
+        font-size: .79rem;
+        margin-bottom: .3rem;
+      }
+
+      .poke-name {
+        font-size: .95rem;
+      }
+
+      /* Checklist wraps tighter */
+      .card-checklist {
+        gap: .3rem;
+      }
+
+      .check-item {
+        font-size: .65rem;
+        padding: .35rem .55rem;
+        min-height: 40px;
+      }
+
+      /* Type analysis */
+      .type-analysis {
+        padding: .75rem .9rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      header h1 {
+        display: none;
+      }
+
+      .card-grid,
+      .card-grid.detailed {
+        gap: 1rem;
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       TEAM BLOCKS (Compétitif)
+    ══════════════════════════════════════════ */
+    /* Conteneur externe : empilement vertical simple, pas de grid */
+    .teams-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .team-block {
+      margin-bottom: 3rem;
+    }
+
+    .team-header {
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+      margin-bottom: 1.1rem;
+      padding: .7rem 1.2rem;
+      background: linear-gradient(135deg, rgba(112, 56, 248, .12), rgba(232, 33, 42, .08));
+      border: 1.5px solid rgba(112, 56, 248, .25);
+      border-radius: var(--radius-sm);
+      backdrop-filter: blur(4px);
+    }
+
+    .team-header-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .team-header-name {
+      font-family: var(--font-h);
+      font-size: 1.15rem;
+      color: var(--dark);
+      flex: 1;
+    }
+
+    .team-id-tag {
+      font-size: .65rem;
+      font-weight: 800;
+      font-family: monospace;
+      letter-spacing: .5px;
+      color: rgba(112, 56, 248, .75);
+      background: rgba(112, 56, 248, .08);
+      border: 1px solid rgba(112, 56, 248, .2);
+      border-radius: 50px;
+      padding: .2rem .65rem;
+    }
+
+    .team-count-badge {
+      font-size: .75rem;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(135deg, #7038F8, #e8212a);
+      border-radius: 50px;
+      padding: .2rem .7rem;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      .team-header {
+        padding: .55rem .9rem;
+        gap: .6rem;
+      }
+
+      .team-header-name {
+        font-size: 1rem;
+      }
+
+      .team-id-tag {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header>
+    <div class="header-inner">
+      <div class="rotom-icon">⚡</div>
+      <h1>Rotom-<span>Dex</span> — Mon Équipe</h1>
+      <nav>
+        <a href="#aventure" class="active" id="nav-aventure">🌴 Aventure</a>
+        <a href="#combat" id="nav-combat">⚔️ Combat</a>
+        <a href="#competitif" id="nav-competitif">🏆 Compétitif</a>
+      </nav>
+      <!-- Day/Night Widget -->
+      <div class="day-night-widget" id="dn-widget">
+        <span class="dn-icon" id="dn-icon">☀️</span>
+        <div>
+          <div class="dn-time" id="dn-time">--:--</div>
+          <div class="dn-label" id="dn-label">Jour</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ═══════════════════════════════════
+       SECTION 1 — AVENTURE
+    ═══════════════════════════════════ -->
+    <section id="aventure">
+      <div class="section-header">
+        <div class="section-badge badge-aventure">🌴</div>
+        <div>
+          <div class="section-title">Aventure</div>
+          <div class="section-subtitle">Équipe principale pour l'histoire</div>
+        </div>
+        <div class="pokeball-counter" id="count-aventure">⚪ 0 / 18</div>
+      </div>
+      <div class="section-divider s1-divider"></div>
+      <div class="card-grid" id="grid-aventure"></div>
+      <div class="type-analysis" id="analysis-aventure"></div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+       SECTION 2 — ARBRE DE COMBAT
+    ═══════════════════════════════════ -->
+    <section id="combat">
+      <div class="section-header">
+        <div class="section-badge badge-combat">⚔️</div>
+        <div>
+          <div class="section-title">Arbre de Combat</div>
+          <div class="section-subtitle">Sets optimisés pour le Battle Tree</div>
+        </div>
+        <div class="pokeball-counter" id="count-combat">⚪ 0 / 18</div>
+      </div>
+      <div class="section-divider s2-divider"></div>
+      <div class="card-grid detailed" id="grid-combat"></div>
+      <div class="type-analysis" id="analysis-combat"></div>
+    </section>
+
+    <!-- ═══════════════════════════════════
+       SECTION 3 — COMPÉTITIF
+    ═══════════════════════════════════ -->
+    <section id="competitif">
+      <div class="section-header">
+        <div class="section-badge badge-competitif">🏆</div>
+        <div>
+          <div class="section-title">Compétitif</div>
+          <div class="section-subtitle">Sets VGC / Smogon optimisés</div>
+        </div>
+        <div class="pokeball-counter" id="count-competitif">⚪ 0 / 18</div>
+      </div>
+      <div class="section-divider s3-divider"></div>
+      <div class="teams-container" id="grid-competitif"></div>
+      <div class="type-analysis" id="analysis-competitif"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    Rotom-Dex Dashboard &nbsp;•&nbsp; Pokémon Soleil &nbsp;•&nbsp; Fait avec <span>♥</span>
+  </footer>
+
+  <!-- ══════════════ BOTTOM NAV (mobile only) ══════════════ -->
+  <nav class="bottom-nav" id="bottom-nav" aria-label="Navigation principale">
+    <a href="#aventure" class="active" id="bn-aventure">
+      <span class="bn-icon">🌴</span>
+      Aventure
+    </a>
+    <a href="#combat" id="bn-combat">
+      <span class="bn-icon">⚔️</span>
+      Combat
+    </a>
+    <a href="#competitif" id="bn-competitif">
+      <span class="bn-icon">🏆</span>
+      Compétitif
+    </a>
+  </nav>
+
+  <script>
+    /* ══════════════════════════════════════════════════════════════
+       DATA
+       ══════════════════════════════════════════════════════════════
+       Champs : name, types[], nature, ability, item, evs[], moves[], location?, englishName
+       evs : [{ stat: "ATQ", value: 252 }, ...]   — [] si aucun EV
+       nature : "-" si non renseignée
+       null → carte vide / slot libre
+       ══════════════════════════════════════════════════════════════ */
+
+    /* ══════════════════════════════════════════════════════════════
+       ÉQUIPES COMPÉTITIVES (VGC / Smogon)
+       Champs : team_name, team_id (snake_case), members[]
+       ══════════════════════════════════════════════════════════════ */
+    const COMPETITIVE_TEAMS = {
+      "teams": [
+        {
+          "team_name": "Sun Offensif Classique",
+          "team_id": "sun_offensif_classique",
+          "members": [
+            {
+              "name": "Feunard d'Alola",
+              "englishName": "ninetales-alola",
+              "types": ["Glace", "Fée"],
+              "nature": "Timide",
+              "ability": "Alerte Neige",
+              "item": "Voile Aurore",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Voile Aurore", "Vent Glace", "Pouvoir Lunaire", "Blizzard"]
+            },
+            {
+              "name": "Arcanin",
+              "englishName": "arcanine",
+              "types": ["Feu"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Ceinture Force",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Boutefeu", "Vitesse Extrême", "Sabotage", "Hurlement"]
+            },
+            {
+              "name": "Floramantis",
+              "englishName": "lurantis",
+              "types": ["Plante"],
+              "nature": "Rigide",
+              "ability": "Chlorophylle",
+              "item": "Herbe Blanche",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Lame Feuille", "Lame Sainte", "Danse-Lames", "Synthèse"]
+            },
+            {
+              "name": "Tokotoro",
+              "englishName": "tapubulu",
+              "types": ["Plante", "Fée"],
+              "nature": "Rigide",
+              "ability": "Créa-Herbe",
+              "item": "Veste de Combat",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Bois Tacle", "Lame Sainte", "Direct Toxik", "Sabotage"]
+            },
+            {
+              "name": "Carchacrok",
+              "englishName": "garchomp",
+              "types": ["Dragon", "Sol"],
+              "nature": "Jovial",
+              "ability": "Peau Dure",
+              "item": "Casque Brut",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Séisme", "Colère", "Piège de Roc", "Direct Toxik"]
+            },
+            {
+              "name": "Katagami",
+              "englishName": "kartana",
+              "types": ["Plante", "Acier"],
+              "nature": "Jovial",
+              "ability": "Boost Chimère",
+              "item": "Métallozélite",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Lame Feuille", "Lame Sainte", "Estocorne", "Danse-Lames"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Hyper Offense Ultra-Chimeres",
+          "team_id": "hyper_offense_ultra_chimeres",
+          "members": [
+            {
+              "name": "Cancrelove",
+              "englishName": "pheromosa",
+              "types": ["Insecte", "Combat"],
+              "nature": "Naïf",
+              "ability": "Boost Chimère",
+              "item": "Ceinture Force",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ SP", "value": 4 }
+              ],
+              "moves": ["Pied Voltige", "Demi-Tour", "Noeud Herbe", "Direct Toxik"]
+            },
+            {
+              "name": "Câblifère",
+              "englishName": "xurkitree",
+              "types": ["Électrik"],
+              "nature": "Timide",
+              "ability": "Boost Chimère",
+              "item": "Lunettes Choix",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Éco-Sphère", "Noeud Herbe", "Rayon Chargé"]
+            },
+            {
+              "name": "Zéroïd",
+              "englishName": "nihilego",
+              "types": ["Roche", "Poison"],
+              "nature": "Timide",
+              "ability": "Boost Chimère",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Lame de Roc", "Bomb-Beurk", "Pouvoir Lunaire", "Telluriforce"]
+            },
+            {
+              "name": "Katagami",
+              "englishName": "kartana",
+              "types": ["Plante", "Acier"],
+              "nature": "Jovial",
+              "ability": "Boost Chimère",
+              "item": "Mouchoir Choix",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Lame Feuille", "Lame Sainte", "Estocorne", "Demi-Tour"]
+            },
+            {
+              "name": "Engloutyran",
+              "englishName": "guzzlord",
+              "types": ["Ténèbres", "Dragon"],
+              "nature": "Brave",
+              "ability": "Boost Chimère",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Draco-Choc", "Mâchouille", "Séisme", "Repos"]
+            },
+            {
+              "name": "Tokorico",
+              "englishName": "tapukoko",
+              "types": ["Électrik", "Fée"],
+              "nature": "Timide",
+              "ability": "Créa-Élec",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Éclat Magique", "Change Éclair", "Pouvoir Antique"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Balanced Tapus et Dragons",
+          "team_id": "balanced_tapus_et_dragons",
+          "members": [
+            {
+              "name": "Tokorico",
+              "englishName": "tapukoko",
+              "types": ["Électrik", "Fée"],
+              "nature": "Timide",
+              "ability": "Créa-Élec",
+              "item": "Lunettes Choix",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Éclat Magique", "Change Éclair", "Pouvoir Antique"]
+            },
+            {
+              "name": "Tokopiyon",
+              "englishName": "tapulele",
+              "types": ["Psy", "Fée"],
+              "nature": "Modeste",
+              "ability": "Créa-Psy",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Psyko", "Éclat Magique", "Exploforce", "Ball'Ombre"]
+            },
+            {
+              "name": "Tokotoro",
+              "englishName": "tapubulu",
+              "types": ["Plante", "Fée"],
+              "nature": "Rigide",
+              "ability": "Créa-Herbe",
+              "item": "Veste de Combat",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Bois Tacle", "Lame Sainte", "Direct Toxik", "Sabotage"]
+            },
+            {
+              "name": "Dracaufeu",
+              "englishName": "charizard",
+              "types": ["Feu", "Vol"],
+              "nature": "Timide",
+              "ability": "Brasier",
+              "item": "Charizardite Y",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Déflagration", "Lance-Soleil", "Dracochoc", "Atterrissage"]
+            },
+            {
+              "name": "Carchacrok",
+              "englishName": "garchomp",
+              "types": ["Dragon", "Sol"],
+              "nature": "Jovial",
+              "ability": "Peau Dure",
+              "item": "Casque Brut",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Séisme", "Colère", "Piège de Roc", "Direct Toxik"]
+            },
+            {
+              "name": "Noacier",
+              "englishName": "ferrothorn",
+              "types": ["Plante", "Acier"],
+              "nature": "Relax",
+              "ability": "Épine de Fer",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 88 },
+                { "stat": "DEF SP", "value": 168 }
+              ],
+              "moves": ["Gyroballe", "Vampigraine", "Abri", "Piège de Roc"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Core Tenebres Acier Fee",
+          "team_id": "core_tenebres_acier_fee",
+          "members": [
+            {
+              "name": "Mimiqui",
+              "englishName": "mimikyu",
+              "types": ["Spectre", "Fée"],
+              "nature": "Jovial",
+              "ability": "Fantômasque",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Lames", "Ombre Portée", "Câlinerie", "Griffe Ombre"]
+            },
+            {
+              "name": "Noacier",
+              "englishName": "ferrothorn",
+              "types": ["Plante", "Acier"],
+              "nature": "Relax",
+              "ability": "Épine de Fer",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 88 },
+                { "stat": "DEF SP", "value": 168 }
+              ],
+              "moves": ["Gyroballe", "Vampigraine", "Abri", "Piège de Roc"]
+            },
+            {
+              "name": "Magnézone",
+              "englishName": "magnezone",
+              "types": ["Électrik", "Acier"],
+              "nature": "Timide",
+              "ability": "Magnépiège",
+              "item": "Lunettes Choix",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Luminocanon", "Change Éclair", "Exploforce"]
+            },
+            {
+              "name": "Drattak",
+              "englishName": "salamence",
+              "types": ["Dragon", "Vol"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Salamencite",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Draco", "Colère", "Séisme", "Atterrissage"]
+            },
+            {
+              "name": "Tokopiyon",
+              "englishName": "tapulele",
+              "types": ["Psy", "Fée"],
+              "nature": "Modeste",
+              "ability": "Créa-Psy",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Psyko", "Éclat Magique", "Exploforce", "Ball'Ombre"]
+            },
+            {
+              "name": "Tritosor",
+              "englishName": "gastrodon",
+              "types": ["Eau", "Sol"],
+              "nature": "Calme",
+              "ability": "Lavabo",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF SP", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Ébullition", "Telluriforce", "Soin", "Toxik"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Double Dragons et Fee",
+          "team_id": "double_dragons_et_fee",
+          "members": [
+            {
+              "name": "Drattak",
+              "englishName": "salamence",
+              "types": ["Dragon", "Vol"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Salamencite",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Draco", "Colère", "Séisme", "Atterrissage"]
+            },
+            {
+              "name": "Carchacrok",
+              "englishName": "garchomp",
+              "types": ["Dragon", "Sol"],
+              "nature": "Jovial",
+              "ability": "Peau Dure",
+              "item": "Casque Brut",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Séisme", "Colère", "Piège de Roc", "Direct Toxik"]
+            },
+            {
+              "name": "Tokopiyon",
+              "englishName": "tapulele",
+              "types": ["Psy", "Fée"],
+              "nature": "Modeste",
+              "ability": "Créa-Psy",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Psyko", "Éclat Magique", "Exploforce", "Ball'Ombre"]
+            },
+            {
+              "name": "Arcanin",
+              "englishName": "arcanine",
+              "types": ["Feu"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 248 },
+                { "stat": "DEF", "value": 252 },
+                { "stat": "VIT", "value": 8 }
+              ],
+              "moves": ["Boutefeu", "Vitesse Extrême", "Feu Follet", "Atterrissage"]
+            },
+            {
+              "name": "Tritosor",
+              "englishName": "gastrodon",
+              "types": ["Eau", "Sol"],
+              "nature": "Calme",
+              "ability": "Lavabo",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF SP", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Ébullition", "Telluriforce", "Soin", "Toxik"]
+            },
+            {
+              "name": "Katagami",
+              "englishName": "kartana",
+              "types": ["Plante", "Acier"],
+              "nature": "Jovial",
+              "ability": "Boost Chimère",
+              "item": "Mouchoir Choix",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Lame Feuille", "Lame Sainte", "Estocorne", "Demi-Tour"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Anti-Metagame UC et Tapus",
+          "team_id": "anti_metagame_uc_et_tapus",
+          "members": [
+            {
+              "name": "Tritosor",
+              "englishName": "gastrodon",
+              "types": ["Eau", "Sol"],
+              "nature": "Calme",
+              "ability": "Lavabo",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF SP", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Ébullition", "Telluriforce", "Soin", "Toxik"]
+            },
+            {
+              "name": "Bamboiselle",
+              "englishName": "celesteela",
+              "types": ["Acier", "Vol"],
+              "nature": "Malin",
+              "ability": "Boost Chimère",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Lance-Flammes", "Toxik", "Abri", "Aéropique"]
+            },
+            {
+              "name": "Arcanin",
+              "englishName": "arcanine",
+              "types": ["Feu"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 248 },
+                { "stat": "DEF", "value": 252 },
+                { "stat": "VIT", "value": 8 }
+              ],
+              "moves": ["Boutefeu", "Feu Follet", "Atterrissage", "Hurlement"]
+            },
+            {
+              "name": "Tokorico",
+              "englishName": "tapukoko",
+              "types": ["Électrik", "Fée"],
+              "nature": "Timide",
+              "ability": "Créa-Élec",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Éclat Magique", "Change Éclair", "Pouvoir Antique"]
+            },
+            {
+              "name": "Carchacrok",
+              "englishName": "garchomp",
+              "types": ["Dragon", "Sol"],
+              "nature": "Jovial",
+              "ability": "Peau Dure",
+              "item": "Casque Brut",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Séisme", "Colère", "Piège de Roc", "Direct Toxik"]
+            },
+            {
+              "name": "Mimiqui",
+              "englishName": "mimikyu",
+              "types": ["Spectre", "Fée"],
+              "nature": "Jovial",
+              "ability": "Fantômasque",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Lames", "Ombre Portée", "Câlinerie", "Griffe Ombre"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Psy Terrain Offense",
+          "team_id": "psy_terrain_offense",
+          "members": [
+            {
+              "name": "Tokopiyon",
+              "englishName": "tapulele",
+              "types": ["Psy", "Fée"],
+              "nature": "Modeste",
+              "ability": "Créa-Psy",
+              "item": "Lunettes Choix",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Psyko", "Éclat Magique", "Exploforce", "Ball'Ombre"]
+            },
+            {
+              "name": "Zéroïd",
+              "englishName": "nihilego",
+              "types": ["Roche", "Poison"],
+              "nature": "Timide",
+              "ability": "Boost Chimère",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Lame de Roc", "Bomb-Beurk", "Pouvoir Lunaire", "Telluriforce"]
+            },
+            {
+              "name": "Câblifère",
+              "englishName": "xurkitree",
+              "types": ["Électrik"],
+              "nature": "Timide",
+              "ability": "Boost Chimère",
+              "item": "Lunettes Choix",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Éco-Sphère", "Rayon Chargé", "Noeud Herbe"]
+            },
+            {
+              "name": "Mimiqui",
+              "englishName": "mimikyu",
+              "types": ["Spectre", "Fée"],
+              "nature": "Jovial",
+              "ability": "Fantômasque",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Lames", "Ombre Portée", "Câlinerie", "Griffe Ombre"]
+            },
+            {
+              "name": "Drattak",
+              "englishName": "salamence",
+              "types": ["Dragon", "Vol"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Salamencite",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Draco", "Colère", "Séisme", "Atterrissage"]
+            },
+            {
+              "name": "Katagami",
+              "englishName": "kartana",
+              "types": ["Plante", "Acier"],
+              "nature": "Jovial",
+              "ability": "Boost Chimère",
+              "item": "Mouchoir Choix",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Lame Feuille", "Lame Sainte", "Estocorne", "Demi-Tour"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Bulky Water et Tapus",
+          "team_id": "bulky_water_et_tapus",
+          "members": [
+            {
+              "name": "Tritosor",
+              "englishName": "gastrodon",
+              "types": ["Eau", "Sol"],
+              "nature": "Calme",
+              "ability": "Lavabo",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF SP", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Ébullition", "Telluriforce", "Soin", "Toxik"]
+            },
+            {
+              "name": "Prédastérie",
+              "englishName": "toxapex",
+              "types": ["Poison", "Eau"],
+              "nature": "Assuré",
+              "ability": "Régé-Force",
+              "item": "Boue Noire",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Ébullition", "Soin", "Toxik", "Buée Noire"]
+            },
+            {
+              "name": "Tokotoro",
+              "englishName": "tapubulu",
+              "types": ["Plante", "Fée"],
+              "nature": "Rigide",
+              "ability": "Créa-Herbe",
+              "item": "Veste de Combat",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Bois Tacle", "Lame Sainte", "Direct Toxik", "Sabotage"]
+            },
+            {
+              "name": "Drattak",
+              "englishName": "salamence",
+              "types": ["Dragon", "Vol"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Salamencite",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Draco", "Colère", "Séisme", "Atterrissage"]
+            },
+            {
+              "name": "Carchacrok",
+              "englishName": "garchomp",
+              "types": ["Dragon", "Sol"],
+              "nature": "Jovial",
+              "ability": "Peau Dure",
+              "item": "Casque Brut",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Séisme", "Colère", "Piège de Roc", "Direct Toxik"]
+            },
+            {
+              "name": "Tokorico",
+              "englishName": "tapukoko",
+              "types": ["Électrik", "Fée"],
+              "nature": "Timide",
+              "ability": "Créa-Élec",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Éclat Magique", "Change Éclair", "Pouvoir Antique"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Full Offense Sans Setup",
+          "team_id": "full_offense_sans_setup",
+          "members": [
+            {
+              "name": "Tokorico",
+              "englishName": "tapukoko",
+              "types": ["Électrik", "Fée"],
+              "nature": "Timide",
+              "ability": "Créa-Élec",
+              "item": "Lunettes Choix",
+              "evs": [
+                { "stat": "ATQ SP", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Tonnerre", "Éclat Magique", "Change Éclair", "Pouvoir Antique"]
+            },
+            {
+              "name": "Katagami",
+              "englishName": "kartana",
+              "types": ["Plante", "Acier"],
+              "nature": "Jovial",
+              "ability": "Boost Chimère",
+              "item": "Mouchoir Choix",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Lame Feuille", "Lame Sainte", "Estocorne", "Demi-Tour"]
+            },
+            {
+              "name": "Drattak",
+              "englishName": "salamence",
+              "types": ["Dragon", "Vol"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Salamencite",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Draco", "Colère", "Séisme", "Atterrissage"]
+            },
+            {
+              "name": "Carchacrok",
+              "englishName": "garchomp",
+              "types": ["Dragon", "Sol"],
+              "nature": "Jovial",
+              "ability": "Peau Dure",
+              "item": "Ceinture Force",
+              "evs": [
+                { "stat": "VIT", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Séisme", "Colère", "Piège de Roc", "Direct Toxik"]
+            },
+            {
+              "name": "Arcanin",
+              "englishName": "arcanine",
+              "types": ["Feu"],
+              "nature": "Jovial",
+              "ability": "Intimidation",
+              "item": "Bandeau Choix",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Boutefeu", "Vitesse Extrême", "Sabotage", "Hurlement"]
+            },
+            {
+              "name": "Mimiqui",
+              "englishName": "mimikyu",
+              "types": ["Spectre", "Fée"],
+              "nature": "Jovial",
+              "ability": "Fantômasque",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Lames", "Ombre Portée", "Câlinerie", "Griffe Ombre"]
+            }
+          ]
+        },
+
+        {
+          "team_name": "Stall et Semi-Stall",
+          "team_id": "stall_et_semi_stall",
+          "members": [
+            {
+              "name": "Prédastérie",
+              "englishName": "toxapex",
+              "types": ["Poison", "Eau"],
+              "nature": "Assuré",
+              "ability": "Régé-Force",
+              "item": "Boue Noire",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Ébullition", "Soin", "Toxik", "Buée Noire"]
+            },
+            {
+              "name": "Noacier",
+              "englishName": "ferrothorn",
+              "types": ["Plante", "Acier"],
+              "nature": "Relax",
+              "ability": "Épine de Fer",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 88 },
+                { "stat": "DEF SP", "value": 168 }
+              ],
+              "moves": ["Gyroballe", "Vampigraine", "Abri", "Piège de Roc"]
+            },
+            {
+              "name": "Bamboiselle",
+              "englishName": "celesteela",
+              "types": ["Acier", "Vol"],
+              "nature": "Malin",
+              "ability": "Boost Chimère",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Lance-Flammes", "Toxik", "Abri", "Aéropique"]
+            },
+            {
+              "name": "Tritosor",
+              "englishName": "gastrodon",
+              "types": ["Eau", "Sol"],
+              "nature": "Calme",
+              "ability": "Lavabo",
+              "item": "Restes",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "DEF SP", "value": 252 },
+                { "stat": "DEF", "value": 4 }
+              ],
+              "moves": ["Ébullition", "Telluriforce", "Soin", "Toxik"]
+            },
+            {
+              "name": "Tokotoro",
+              "englishName": "tapubulu",
+              "types": ["Plante", "Fée"],
+              "nature": "Rigide",
+              "ability": "Créa-Herbe",
+              "item": "Veste de Combat",
+              "evs": [
+                { "stat": "PV", "value": 252 },
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "DEF SP", "value": 4 }
+              ],
+              "moves": ["Bois Tacle", "Lame Sainte", "Direct Toxik", "Sabotage"]
+            },
+            {
+              "name": "Mimiqui",
+              "englishName": "mimikyu",
+              "types": ["Spectre", "Fée"],
+              "nature": "Jovial",
+              "ability": "Fantômasque",
+              "item": "Orbe Vie",
+              "evs": [
+                { "stat": "ATQ", "value": 252 },
+                { "stat": "VIT", "value": 252 },
+                { "stat": "PV", "value": 4 }
+              ],
+              "moves": ["Danse-Lames", "Ombre Portée", "Câlinerie", "Griffe Ombre"]
+            }
+          ]
+        }
+      ]
+    };
+
+    const POKEMON_DATA = {
+      "aventure": [
+        {
+          "name": "Oratoria",
+          "englishName": "primarina",
+          "types": ["Eau", "Fée"],
+          "nature": "-",
+          "ability": "Torrent",
+          "item": "Eauzéliste",
+          "evs": [],
+          "moves": ["Aria de l'Écume", "Pouvoir Lunaire", "Aqua-Jet", "Laser Glace"],
+          "location": "Starter Lili'i"
+        },
+        {
+          "name": "Lougaroc (Diurne)",
+          "englishName": "lycanroc",
+          "types": ["Roche"],
+          "nature": "-",
+          "ability": "Baigne Sable",
+          "item": "Rochezéliste",
+          "evs": [],
+          "moves": ["Vif-Roc", "Éboulement", "Mâchouille", "Danse-Lames"],
+          "location": "Colline Dicarat (Caldeira Toutofon)"
+        },
+        {
+          "name": "Malamandre",
+          "englishName": "salazzle",
+          "types": ["Feu", "Poison"],
+          "nature": "-",
+          "ability": "Corrosion",
+          "item": "Pyrozéliste",
+          "evs": [],
+          "moves": ["Lance-Flammes", "Cradopaud", "Machination", "Dracochoc"],
+          "location": "Parc Volcanique Wela"
+        },
+        {
+          "name": "Magnézone",
+          "englishName": "magnezone",
+          "types": ["Acier", "Électrik"],
+          "nature": "-",
+          "ability": "Fermeté",
+          "item": "Aimant",
+          "evs": [],
+          "moves": ["Tonnerre", "Luminocanon", "Change Éclair", "Cage-Éclair"],
+          "location": "Périphérie d'Ekaeka"
+        },
+        {
+          "name": "Bourrinos",
+          "englishName": "mudsdale",
+          "types": ["Sol"],
+          "nature": "-",
+          "ability": "Endurance",
+          "item": "Terre Douce",
+          "evs": [],
+          "moves": ["Séisme", "Tacle Lourd", "Éboulement", "Surpuissance"],
+          "location": "Route 12"
+        },
+        {
+          "name": "Mimiqui",
+          "englishName": "mimikyu",
+          "types": ["Spectre", "Fée"],
+          "nature": "-",
+          "ability": "Fantômasque",
+          "item": "Grelot Coque",
+          "evs": [],
+          "moves": ["Câlinerie", "Griffe Ombre", "Ombre Portée", "Danse-Lames"],
+          "location": "Site Désaffecté"
+        }
+      ],
+      "combat": [
+        {
+          "name": "Tokorico",
+          "englishName": "tapukoko",
+          "types": ["Électrik", "Fée"],
+          "nature": "Timide",
+          "ability": "Créa-Élec",
+          "item": "Orbe Vie",
+          "evs": [{ "stat": "ATQ SP", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "DEF SP", "value": 4 }],
+          "moves": ["Tonnerre", "Éclat Magique", "Nœud Herbe", "Change Éclair"]
+        },
+        {
+          "name": "Katagami",
+          "englishName": "kartana",
+          "types": ["Plante", "Acier"],
+          "nature": "Jovial",
+          "ability": "Boost Chimère",
+          "item": "Mouchoir Choix",
+          "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "DEF", "value": 4 }],
+          "moves": ["Lame Feuille", "Estocorne", "Lame Sainte", "Sabotage"]
+        },
+        {
+          "name": "Méga-Drattak",
+          "englishName": "salamence-mega",
+          "types": ["Dragon", "Vol"],
+          "nature": "Rigide",
+          "ability": "Peau Céleste",
+          "item": "Drattakite",
+          "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }],
+          "moves": ["Danse Draco", "Damoclès", "Séisme", "Atterrissage"]
+        }
+      ],
+      "competitif": [
+        {
+          "name": "Tokopiyon",
+          "englishName": "tapulele",
+          "types": ["Psy", "Fée"],
+          "nature": "Modeste",
+          "ability": "Créa-Élec",
+          "item": "Lunettes Choix",
+          "evs": [{ "stat": "ATQ SP", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "DEF SP", "value": 4 }],
+          "moves": ["Tonnerre", "Éclat Magique", "Nœud Herbe", "Exploforce"]
+        },
+        {
+          "name": "Prédastérie",
+          "englishName": "toxapex",
+          "types": ["Poison", "Eau"],
+          "nature": "Assuré",
+          "ability": "Régé-Force",
+          "item": "Boue Noire",
+          "evs": [{ "stat": "PV", "value": 252 }, { "stat": "DEF", "value": 252 }, { "stat": "DEF SP", "value": 4 }],
+          "moves": ["Ébullition", "Soin", "Toxik", "Buée Noire"]
+        },
+        {
+          "name": "Ossatueur",
+          "englishName": "marowak-alola",
+          "types": ["Feu", "Spectre"],
+          "nature": "Rigide",
+          "ability": "Paratonnerre",
+          "item": "Masse Os",
+          "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "PV", "value": 248 }, { "stat": "DEF SP", "value": 8 }],
+          "moves": ["Boutefeu", "Os Ombre", "Feu Follet", "Séisme"]
+        },
+        {
+          "name": "Carchacrok",
+          "englishName": "garchomp",
+          "types": ["Dragon", "Sol"],
+          "nature": "Jovial",
+          "ability": "Peau Dure",
+          "item": "Casque Brut",
+          "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }],
+          "moves": ["Piège de Roc", "Séisme", "Colère", "Direct Toxik"]
+        },
+        {
+          "name": "Méga-Cizayox",
+          "englishName": "scizor-mega",
+          "types": ["Insecte", "Acier"],
+          "nature": "Malin",
+          "ability": "Technicien",
+          "item": "Cizayoxite",
+          "evs": [{ "stat": "PV", "value": 248 }, { "stat": "DEF SP", "value": 200 }, { "stat": "DEF", "value": 60 }],
+          "moves": ["Danse-Lames", "Pisto-Poing", "Atterrissage", "Demi-Tour"]
+        },
+        {
+          "name": "Katagami",
+          "englishName": "kartana",
+          "types": ["Plante", "Acier"],
+          "nature": "Jovial",
+          "ability": "Boost Chimère",
+          "item": "Métallozéliste",
+          "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "DEF", "value": 4 }],
+          "moves": ["Lame Feuille", "Estocorne", "Lame Sainte", "Danse-Lames"]
+        }
+      ]
+    };
+
+    /* ══════════════════════════════════════════
+       TYPE COLORS
+    ══════════════════════════════════════════ */
+    const TYPE_COLORS = {
+      Normal: ["#A8A878", "#8A8A59"], Feu: ["#F08030", "#C06018"],
+      Eau: ["#6890F0", "#4870C0"], Plante: ["#78C850", "#5CA935"],
+      Électrik: ["#F8D030", "#C4A800"], Glace: ["#98D8D8", "#69BDBD"],
+      Combat: ["#C03028", "#9D1F19"], Poison: ["#A040A0", "#7A2F7A"],
+      Sol: ["#E0C068", "#BFA135"], Vol: ["#A890F0", "#8060D0"],
+      Psy: ["#F85888", "#D33A67"], Insecte: ["#A8B820", "#7D8A10"],
+      Roche: ["#B8A038", "#8E7820"], Spectre: ["#705898", "#553B78"],
+      Dragon: ["#7038F8", "#4A16D8"], Ténèbres: ["#705848", "#513D30"],
+      Acier: ["#B8B8D0", "#8E8EAE"], Fée: ["#EE99AC", "#D96B85"]
+    };
+
+    /* ══════════════════════════════════════════
+       TYPE WEAKNESS TABLE (attaquant → défenseurs faibles)
+       Pour chaque TYPE d'attaque, quels TYPES défensifs prennent ×2 ?
+    ══════════════════════════════════════════ */
+    const TYPE_WEAKNESSES = {
+      // clé = type de l'attaque, valeur = types défensifs qui prennent ×2
+      "Normal": [],
+      "Feu": ["Plante", "Glace", "Insecte", "Acier"],
+      "Eau": ["Feu", "Roche", "Sol"],
+      "Plante": ["Eau", "Roche", "Sol"],
+      "Électrik": ["Eau", "Vol"],
+      "Glace": ["Plante", "Sol", "Vol", "Dragon"],
+      "Combat": ["Normal", "Glace", "Roche", "Ténèbres", "Acier"],
+      "Poison": ["Plante", "Fée"],
+      "Sol": ["Feu", "Électrik", "Poison", "Roche", "Acier"],
+      "Vol": ["Plante", "Combat", "Insecte"],
+      "Psy": ["Combat", "Poison"],
+      "Insecte": ["Plante", "Psy", "Ténèbres"],
+      "Roche": ["Feu", "Glace", "Vol", "Insecte"],
+      "Spectre": ["Psy", "Spectre"],
+      "Dragon": ["Dragon"],
+      "Ténèbres": ["Psy", "Spectre"],
+      "Acier": ["Glace", "Roche", "Fée"],
+      "Fée": ["Combat", "Dragon", "Ténèbres"]
+    };
+
+    /* ══════════════════════════════════════════
+       SPRITE ID MAP — Explicit lookup table for Showdown sprites
+       Format: englishName (lowercase) → Showdown sprite ID
+    ══════════════════════════════════════════ */
+    const SPRITE_MAP = {
+      // Aventure
+      "primarina": "primarina",
+      "lycanroc": "lycanroc",
+      "salazzle": "salazzle",
+      "magnezone": "magnezone",
+      "mudsdale": "mudsdale",
+      "mimikyu": "mimikyu",
+      // Combat
+      "tapukoko": "tapukoko",
+      "kartana": "kartana",
+      "salamence-mega": "salamence-mega",
+      // Compétitif
+      "tapulele": "tapulele",
+      "toxapex": "toxapex",
+      "marowak-alola": "marowak-alola",
+      "garchomp": "garchomp",
+      "scizor-mega": "scizor-mega",
+    };
+
+    function spriteUrl(englishName) {
+      if (!englishName) return null;
+      const key = englishName.toLowerCase().trim();
+      const id = SPRITE_MAP[key] || key; // fallback to key itself
+      return `https://play.pokemonshowdown.com/sprites/xyani/${id}.gif`;
+    }
+
+    /* ══════════════════════════════════════════
+       HELPERS
+    ══════════════════════════════════════════ */
+    function typeGradient(types) {
+      if (!types || types.length === 0) return "linear-gradient(135deg,#bbb,#999)";
+      const c1 = TYPE_COLORS[types[0]] || ["#999", "#666"];
+      if (types.length === 1) return `linear-gradient(135deg, ${c1[0]}, ${c1[1]})`;
+      const c2 = TYPE_COLORS[types[1]] || c1;
+      return `linear-gradient(135deg, ${c1[0]}, ${c2[0]})`;
+    }
+
+    function padTo18(arr) {
+      const out = arr.slice();
+      while (out.length < 18) out.push(null);
+      return out;
+    }
+
+    function countFilled(arr) { return arr.filter(Boolean).length; }
+
+    /* ══════════════════════════════════════════
+       LOCALSTORAGE CHECKLIST
+    ══════════════════════════════════════════ */
+    const LS_KEY = "rotom-dex-checks-v1";
+
+    function loadChecks() {
+      try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+      catch { return {}; }
+    }
+
+    function saveCheck(section, idx, field, value) {
+      const data = loadChecks();
+      if (!data[section]) data[section] = {};
+      if (!data[section][idx]) data[section][idx] = {};
+      data[section][idx][field] = value;
+      localStorage.setItem(LS_KEY, JSON.stringify(data));
+    }
+
+    const CHECK_FIELDS = [
+      { id: "captured", label: "Capturé", emoji: "🎯" },
+      { id: "ivs", label: "IVs", emoji: "🧬" },
+      { id: "evs", label: "EVs", emoji: "💪" },
+      { id: "moves", label: "Moves", emoji: "⚔️" }
+    ];
+
+    function buildChecklist(section, idx) {
+      const checks = loadChecks();
+      const state = (checks[section] && checks[section][idx]) || {};
+      return CHECK_FIELDS.map(f => {
+        const checked = !!state[f.id];
+        return `<label class="check-item${checked ? ' done' : ''}" id="chk-label-${section}-${idx}-${f.id}">
+          <input type="checkbox" id="chk-${section}-${idx}-${f.id}"
+            data-section="${section}" data-idx="${idx}" data-field="${f.id}"
+            ${checked ? 'checked' : ''}>
+          ${f.emoji} ${f.label}
+        </label>`;
+      }).join('');
+    }
+
+    /* ══════════════════════════════════════════
+       TYPE WEAKNESS ANALYZER
+    ══════════════════════════════════════════ */
+    function analyzeWeaknesses(pokemonList) {
+      // Count for each attacking type, how many Pokémon in the team are weak to it
+      const counts = {};
+      const attackTypes = Object.keys(TYPE_WEAKNESSES);
+
+      attackTypes.forEach(atk => {
+        const defensiveTargets = TYPE_WEAKNESSES[atk]; // types that are weak to this attack
+        let cnt = 0;
+        pokemonList.forEach(p => {
+          if (!p || !p.types) return;
+          // A pokemon is weak if ANY of its types is in the defensiveTargets list
+          const isWeak = p.types.some(t => defensiveTargets.includes(t));
+          if (isWeak) cnt++;
+        });
+        if (cnt > 0) counts[atk] = cnt;
+      });
+
+      return counts;
+    }
+
+    function renderTypeAnalysis(section, pokemonList) {
+      const filled = pokemonList.filter(Boolean);
+      if (filled.length === 0) return '';
+
+      const counts = analyzeWeaknesses(filled);
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+      if (sorted.length === 0) {
+        return `<div class="type-analysis-title">🛡️ Analyse de Type</div><div style="color:var(--grey);font-size:.8rem">Aucune faiblesse commune détectée !</div>`;
+      }
+
+      const chips = sorted.map(([type, count]) => {
+        const col = TYPE_COLORS[type] ? TYPE_COLORS[type][0] : "#999";
+        // Severity colour overlay
+        const intensity = Math.min(count / filled.length, 1);
+        const opacity = 0.6 + intensity * 0.4;
+        return `<span class="weakness-chip" style="background:${col};opacity:${opacity.toFixed(2)}">
+          ${type} <span class="wk-count">${count}/${filled.length}</span>
+        </span>`;
+      }).join('');
+
+      return `
+        <div class="type-analysis-title">🛡️ Analyse de Type — Faiblesses de l'équipe</div>
+        <div class="weakness-grid">${chips}</div>`;
+    }
+
+    /* ══════════════════════════════════════════
+       RENDER — SPRITE
+    ══════════════════════════════════════════ */
+    function renderSprite(p) {
+      if (!p || !p.englishName) return '';
+      const url = spriteUrl(p.englishName);
+      const bg = typeGradient(p.types);
+      return `<div class="card-sprite" style="background:${bg}">
+        <img src="${url}" alt="${p.name}" loading="lazy"
+          onload="this.classList.add('loaded')"
+          onerror="this.parentElement.style.display='none'">
+      </div>`;
+    }
+
+    /* ══════════════════════════════════════════
+       RENDER — CARTE AVENTURE (simple)
+    ══════════════════════════════════════════ */
+    function renderAventureCard(p, idx) {
+      if (!p) return emptyCard(idx);
+      const bg = typeGradient(p.types);
+      const moves = (p.moves || []).concat(["—", "—", "—", "—"]).slice(0, 4);
+      const locationBadge = p.location
+        ? `<div class="location-badge">📍 ${p.location}</div>`
+        : '';
+
+      return `
+  <div class="poke-card">
+    <div class="card-head" style="background:${bg}">
+      <span class="poke-number">#${String(idx + 1).padStart(2, "0")}</span>
+      <span class="poke-name">${p.name}</span>
+      <div class="poke-types">
+        ${(p.types || []).map(t => `<span class="type-badge">${t}</span>`).join("")}
+      </div>
+    </div>
+    ${renderSprite(p)}
+    <div class="card-body">
+      ${locationBadge}
+      <div class="info-row"><span class="info-label">Talent</span><span class="info-value">${p.ability || "—"}</span></div>
+      <div class="info-row"><span class="info-label">Objet</span><span class="info-value">${p.item || "—"}</span></div>
+      <div class="moves-label">Attaques</div>
+      <div class="moves-grid">
+        ${moves.map(m => `<div class="move-chip">${m}</div>`).join("")}
+      </div>
+    </div>
+  </div>`;
+    }
+
+    /* ══════════════════════════════════════════
+       RENDER — CARTE DÉTAILLÉE (Combat / Compétitif)
+    ══════════════════════════════════════════ */
+    function renderDetailCard(p, idx, section) {
+      if (!p) return emptyCard(idx, true);
+      const bg = typeGradient(p.types);
+      const moves = (p.moves || []).concat(["—", "—", "—", "—"]).slice(0, 4);
+      const evArr = Array.isArray(p.evs) ? p.evs : [];
+      const evChips = evArr
+        .map(e => `<span class="ev-chip"><span class="ev-stat">${e.stat}</span><span class="ev-val">${e.value}</span></span>`)
+        .join("");
+      const showNature = p.nature && p.nature !== "-";
+
+      return `
+  <div class="poke-card">
+    <div class="card-head" style="background:${bg}">
+      <span class="poke-number">#${String(idx + 1).padStart(2, "0")}</span>
+      <span class="poke-name">${p.name}</span>
+      <div class="poke-types">
+        ${(p.types || []).map(t => `<span class="type-badge">${t}</span>`).join("")}
+      </div>
+    </div>
+    ${renderSprite(p)}
+    <div class="card-body">
+      ${showNature ? `<div class="info-row"><span class="info-label">Nature</span><span class="info-value">${p.nature}</span></div>` : ""}
+      <div class="info-row"><span class="info-label">Talent</span><span class="info-value">${p.ability || "—"}</span></div>
+      <div class="info-row"><span class="info-label">Objet</span><span class="info-value">${p.item || "—"}</span></div>
+      ${evChips ? `
+      <div class="evs-row">
+        <div class="evs-label">EVs</div>
+        <div class="ev-bars">${evChips}</div>
+      </div>` : ""}
+      <div class="moves-label">Attaques</div>
+      <div class="moves-grid">
+        ${moves.map(m => `<div class="move-chip">${m}</div>`).join("")}
+      </div>
+      <div class="card-checklist">
+        ${buildChecklist(section, idx)}
+      </div>
+    </div>
+  </div>`;
+    }
+
+    /* ══════════════════════════════════════════
+       CARTE VIDE
+    ══════════════════════════════════════════ */
+    function emptyCard(idx, detailed = false) {
+      return `
+  <div class="poke-card empty-card">
+    <div class="card-head" style="background:linear-gradient(135deg,#d0c0b0,#b0a090)">
+      <span class="poke-number">#${String(idx + 1).padStart(2, "0")}</span>
+      <span class="poke-name">Slot libre</span>
+    </div>
+    <div class="card-body">
+      <div class="info-row"><span class="info-label">Talent</span><span class="info-value">—</span></div>
+      <div class="info-row"><span class="info-label">Objet</span><span class="info-value">—</span></div>
+      ${detailed ? `<div class="info-row"><span class="info-label">Nature</span><span class="info-value">—</span></div>
+      <div class="evs-row"><div class="evs-label">EVs</div><div class="ev-bars"><span class="ev-chip" style="background:#ccc"><span class="ev-val">—</span></span></div></div>` : ""}
+      <div class="moves-label">Attaques</div>
+      <div class="moves-grid">
+        <div class="move-chip">—</div><div class="move-chip">—</div>
+        <div class="move-chip">—</div><div class="move-chip">—</div>
+      </div>
+    </div>
+  </div>`;
+    }
+
+    /* ══════════════════════════════════════════
+       DAY / NIGHT WIDGET
+    ══════════════════════════════════════════ */
+    function updateDayNight() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const isDay = h >= 6 && h < 18;
+      const pad = n => String(n).padStart(2, "0");
+
+      document.getElementById("dn-time").textContent = `${pad(h)}:${pad(m)}`;
+      document.getElementById("dn-icon").textContent = isDay ? "☀️" : "🌙";
+      document.getElementById("dn-label").textContent = isDay ? "Jour" : "Nuit";
+
+      const widget = document.getElementById("dn-widget");
+      widget.classList.toggle("night", !isDay);
+    }
+
+    /* ══════════════════════════════════════════
+       CHECKLIST EVENT DELEGATION
+    ══════════════════════════════════════════ */
+    function setupChecklistEvents() {
+      document.body.addEventListener("change", e => {
+        const cb = e.target;
+        if (cb.type !== "checkbox" || !cb.dataset.section) return;
+        const { section, idx, field } = cb.dataset;
+        saveCheck(section, parseInt(idx), field, cb.checked);
+        // Toggle the .done class on the parent label
+        const label = cb.closest(".check-item");
+        if (label) label.classList.toggle("done", cb.checked);
+      });
+    }
+
+    /* ══════════════════════════════════════════
+       PAD & EXPOSE DATA
+    ══════════════════════════════════════════ */
+    const DATA_AVENTURE = padTo18(POKEMON_DATA.aventure);
+    const DATA_COMBAT = padTo18(POKEMON_DATA.combat);
+
+    /* ══════════════════════════════════════════
+       RENDER — BLOC ÉQUIPE COMPÉTITIVE
+    ══════════════════════════════════════════ */
+    function renderTeamBlock(team, teamIdx) {
+      const members = team.members || [];
+      // Index global pour les checklists (unique par équipe × membre)
+      const sectionKey = `competitif_${team.team_id}`;
+      const cards = members.map((p, i) => renderDetailCard(p, i, sectionKey)).join("");
+      return `
+    <div class="team-block" id="team-block-${team.team_id}">
+      <div class="team-header">
+        <span class="team-header-icon">🏆</span>
+        <span class="team-header-name">${team.team_name}</span>
+        <span class="team-id-tag">${team.team_id}</span>
+        <span class="team-count-badge">${members.length} Pokémon</span>
+      </div>
+      <div class="card-grid detailed">${cards}</div>
+    </div>`;
+    }
+
+    /* ══════════════════════════════════════════
+       INIT
+    ══════════════════════════════════════════ */
+    function init() {
+      // ── Section 1 — Aventure ──
+      document.getElementById("grid-aventure").innerHTML =
+        DATA_AVENTURE.map((p, i) => renderAventureCard(p, i)).join("");
+      document.getElementById("count-aventure").innerHTML =
+        `🔴 ${countFilled(DATA_AVENTURE)} / 18`;
+      document.getElementById("analysis-aventure").innerHTML =
+        renderTypeAnalysis("aventure", DATA_AVENTURE);
+
+      // ── Section 2 — Combat ──
+      document.getElementById("grid-combat").innerHTML =
+        DATA_COMBAT.map((p, i) => renderDetailCard(p, i, "combat")).join("");
+      document.getElementById("count-combat").innerHTML =
+        `🔴 ${countFilled(DATA_COMBAT)} / 18`;
+      document.getElementById("analysis-combat").innerHTML =
+        renderTypeAnalysis("combat", DATA_COMBAT);
+
+      // ── Section 3 — Compétitif ──
+      // L'équipe d'origine (POKEMON_DATA.competitif) est affichée en premier,
+      // suivie des équipes de COMPETITIVE_TEAMS
+      const originalTeam = {
+        team_name: "Mon Équipe Compétitive",
+        team_id: "mon_equipe_competitive",
+        members: POKEMON_DATA.competitif
+      };
+      const teams = [originalTeam, ...(COMPETITIVE_TEAMS.teams || [])];
+      document.getElementById("grid-competitif").innerHTML =
+        teams.map((team, i) => renderTeamBlock(team, i)).join("");
+      const totalPokemon = teams.reduce((sum, t) => sum + (t.members || []).length, 0);
+      document.getElementById("count-competitif").innerHTML =
+        `🔴 ${totalPokemon} Pokémon · ${teams.length} équipes`;
+      // Analyse de type sur tous les membres de toutes les équipes
+      const allCompMembers = teams.flatMap(t => t.members || []);
+      document.getElementById("analysis-competitif").innerHTML =
+        renderTypeAnalysis("competitif", allCompMembers);
+
+      // ── Day/Night clock ──
+      updateDayNight();
+      setInterval(updateDayNight, 30_000); // refresh every 30s
+
+      // ── Checklist events (single delegated listener) ──
+      setupChecklistEvents();
+
+      // ── Nav active on scroll (top nav + bottom nav) ──
+      const sections = ["aventure", "combat", "competitif"];
+      const topLinks = document.querySelectorAll("header nav a");
+      const botLinks = document.querySelectorAll(".bottom-nav a");
+      const allLinks = [...topLinks, ...botLinks];
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            allLinks.forEach(l => l.classList.remove("active"));
+            const id = e.target.id;
+            document.querySelectorAll(`a[href="#${id}"]`)
+              .forEach(l => l.classList.add("active"));
+          }
+        });
+      }, { threshold: 0.3 });
+      sections.forEach(id => observer.observe(document.getElementById(id)));
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+
+</html>
