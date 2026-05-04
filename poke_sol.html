@@ -1042,9 +1042,7 @@
     #team-selector {
       appearance: none;
       -webkit-appearance: none;
-      background: var(--white)
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23f5822a' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")
-        no-repeat right 1rem center / 1.1rem;
+      background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23f5822a' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 1rem center / 1.1rem;
       border: 2px solid rgba(112, 56, 248, .3);
       border-radius: 50px;
       padding: .65rem 3rem .65rem 1.4rem;
@@ -1137,7 +1135,17 @@
         <div class="pokeball-counter" id="count-combat">⚪ 0 / 18</div>
       </div>
       <div class="section-divider s2-divider"></div>
-      <div class="card-grid detailed" id="grid-combat"></div>
+
+      <!-- Combat Team Selector -->
+      <div class="team-selector-wrapper">
+        <span class="team-selector-label">⚔️ Équipe :</span>
+        <select id="team-selector-combat" aria-label="Sélectionner une équipe Arbre de Combat">
+          <!-- Options injectées dynamiquement par JS -->
+        </select>
+        <span class="team-selector-counter" id="team-selector-combat-counter">1 / 10</span>
+      </div>
+
+      <div class="teams-container" id="grid-combat-teams"></div>
       <div class="type-analysis" id="analysis-combat"></div>
     </section>
 
@@ -1199,6 +1207,105 @@
        nature : "-" si non renseignée
        null → carte vide / slot libre
        ══════════════════════════════════════════════════════════════ */
+
+    /* ══════════════════════════════════════════════════════════════
+       ÉQUIPES ARBRE DE COMBAT (Super Solo)
+       Champs : team_name, team_id (snake_case), members[]
+       ══════════════════════════════════════════════════════════════ */
+    const COMBAT_TEAMS = {
+      "teams": [
+        {
+          "team_name": "Trio Ultime (La Classique)",
+          "team_id": "trio_ultime",
+          "members": [
+            { "name": "Tokorico", "englishName": "tapukoko", "types": ["Électrik", "Fée"], "nature": "Timide", "ability": "Créa-Élec", "item": "Orbe Vie", "evs": [{ "stat": "ATQ SP", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Tonnerre", "Éclat Magique", "Nœud Herbe", "Change Éclair"] },
+            { "name": "Katagami", "englishName": "kartana", "types": ["Plante", "Acier"], "nature": "Jovial", "ability": "Boost Chimère", "item": "Ceinture Force", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "DEF", "value": 4 }], "moves": ["Lame Feuille", "Estocorne", "Lame Sainte", "Tranche-Nuit"] },
+            { "name": "Méga-Drattak", "englishName": "salamence-mega", "types": ["Dragon", "Vol"], "nature": "Rigide", "ability": "Peau Céleste", "item": "Drattakite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Danse Draco", "Damoclès", "Séisme", "Atterrissage"] }
+          ]
+        },
+        {
+          "team_name": "Sainte Trinité Psy-Acier",
+          "team_id": "psy_acier",
+          "members": [
+            { "name": "Tokopiyon", "englishName": "tapulele", "types": ["Psy", "Fée"], "nature": "Timide", "ability": "Créa-Psy", "item": "Mouchoir Choix", "evs": [{ "stat": "ATQ SP", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Psyko", "Pouvoir Lunaire", "Ball'Ombre", "Éclat Magique"] },
+            { "name": "Méga-Métalosse", "englishName": "metagross-mega", "types": ["Acier", "Psy"], "nature": "Jovial", "ability": "Griffe Dure", "item": "Métalossite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Poing Météore", "Psykoud'Boul", "Pisto-Poing", "Séisme"] },
+            { "name": "Carchacrok", "englishName": "garchomp", "types": ["Dragon", "Sol"], "nature": "Jovial", "ability": "Peau Dure", "item": "Ceinture Force", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Séisme", "Colère", "Danse Lames", "Direct Toxik"] }
+          ]
+        },
+        {
+          "team_name": "Garde Fantôme Offense",
+          "team_id": "garde_fantome",
+          "members": [
+            { "name": "Mimiqui", "englishName": "mimikyu", "types": ["Spectre", "Fée"], "nature": "Jovial", "ability": "Fantômasque", "item": "Spectrozélite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Danse Lames", "Câlinerie", "Griffe Ombre", "Ombre Portée"] },
+            { "name": "Méga-Lucario", "englishName": "lucario-mega", "types": ["Combat", "Acier"], "nature": "Jovial", "ability": "Adaptabilité", "item": "Lucarite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Close Combat", "Pisto-Poing", "Poing Météore", "Danse Lames"] },
+            { "name": "Carchacrok", "englishName": "garchomp", "types": ["Dragon", "Sol"], "nature": "Jovial", "ability": "Peau Dure", "item": "Ceinture Force", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Séisme", "Colère", "Mâchouille", "Tomberoche"] }
+          ]
+        },
+        {
+          "team_name": "Conversion-Z Virtuelle",
+          "team_id": "conversion_z",
+          "members": [
+            { "name": "Porygon-Z", "englishName": "porygonz", "types": ["Normal"], "nature": "Timide", "ability": "Adaptabilité", "item": "Normazélite", "evs": [{ "stat": "ATQ SP", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Conversion", "Tonnerre", "Laser Glace", "Soin"] },
+            { "name": "Méga-Cizayox", "englishName": "scizor-mega", "types": ["Insecte", "Acier"], "nature": "Rigide", "ability": "Technicien", "item": "Cizayoxite", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "ATQ", "value": 252 }, { "stat": "DEF SP", "value": 4 }], "moves": ["Danse Lames", "Pisto-Poing", "Piqûre", "Atterrissage"] },
+            { "name": "Tokopiyon", "englishName": "tapulele", "types": ["Psy", "Fée"], "nature": "Modeste", "ability": "Créa-Psy", "item": "Mouchoir Choix", "evs": [{ "stat": "ATQ SP", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Psyko", "Pouvoir Lunaire", "Ball'Ombre", "Éclat Magique"] }
+          ]
+        },
+        {
+          "team_name": "Déluge (Rain Team)",
+          "team_id": "rain_team",
+          "members": [
+            { "name": "Békipan", "englishName": "pelipper", "types": ["Eau", "Vol"], "nature": "Modeste", "ability": "Crachin", "item": "Ceinture Force", "evs": [{ "stat": "ATQ SP", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Ébullition", "Vent Violent", "Demi-Tour", "Abri"] },
+            { "name": "Méga-Léviator", "englishName": "gyarados-mega", "types": ["Eau", "Ténèbres"], "nature": "Jovial", "ability": "Brise Moule", "item": "Léviatorite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Danse Draco", "Cascade", "Mâchouille", "Séisme"] },
+            { "name": "Tokotoro", "englishName": "tapubulu", "types": ["Plante", "Fée"], "nature": "Rigide", "ability": "Créa-Herbe", "item": "Veste de Combat", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "ATQ", "value": 252 }, { "stat": "DEF SP", "value": 4 }], "moves": ["Encornebois", "Surpuissance", "Direct Toxik", "Mégacorne"] }
+          ]
+        },
+        {
+          "team_name": "Tempête du Désert",
+          "team_id": "sandstorm",
+          "members": [
+            { "name": "Tyranocif", "englishName": "tyranitar", "types": ["Roche", "Ténèbres"], "nature": "Jovial", "ability": "Sable Volant", "item": "Mouchoir Choix", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Lame de Roc", "Mâchouille", "Séisme", "Poing Glace"] },
+            { "name": "Carchacrok", "englishName": "garchomp", "types": ["Dragon", "Sol"], "nature": "Jovial", "ability": "Voile Sable", "item": "Terrazélite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Danse Lames", "Séisme", "Colère", "Direct Toxik"] },
+            { "name": "Méga-Cizayox", "englishName": "scizor-mega", "types": ["Insecte", "Acier"], "nature": "Rigide", "ability": "Technicien", "item": "Cizayoxite", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "ATQ", "value": 252 }, { "stat": "DEF SP", "value": 4 }], "moves": ["Danse Lames", "Pisto-Poing", "Casse-Brique", "Atterrissage"] }
+          ]
+        },
+        {
+          "team_name": "Voile Aurore (Hail Offense)",
+          "team_id": "voile_aurore",
+          "members": [
+            { "name": "Feunard d'Alola", "englishName": "ninetales-alola", "types": ["Glace", "Fée"], "nature": "Timide", "ability": "Alerte Neige", "item": "Lumargile", "evs": [{ "stat": "VIT", "value": 252 }, { "stat": "ATQ SP", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Voile Aurore", "Blizzard", "Pouvoir Lunaire", "Lyophilisation"] },
+            { "name": "Méga-Lucario", "englishName": "lucario-mega", "types": ["Combat", "Acier"], "nature": "Jovial", "ability": "Adaptabilité", "item": "Lucarite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Danse Lames", "Close Combat", "Pisto-Poing", "Séisme"] },
+            { "name": "Léviator", "englishName": "gyarados", "types": ["Eau", "Vol"], "nature": "Jovial", "ability": "Intimidation", "item": "Aquazélite", "evs": [{ "stat": "ATQ", "value": 252 }, { "stat": "VIT", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Danse Draco", "Cascade", "Crocs Givre", "Séisme"] }
+          ]
+        },
+        {
+          "team_name": "Distorsion Macabre (Trick Room)",
+          "team_id": "trick_room",
+          "members": [
+            { "name": "Porygon2", "englishName": "porygon2", "types": ["Normal"], "nature": "Discret", "ability": "Télécharge", "item": "Évoluroc", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "ATQ SP", "value": 252 }, { "stat": "DEF", "value": 4 }], "moves": ["Distorsion", "Tri-Attaque", "Laser Glace", "Soin"] },
+            { "name": "Ossatueur d'Alola", "englishName": "marowak-alola", "types": ["Feu", "Spectre"], "nature": "Brave", "ability": "Paratonnerre", "item": "Masse Os", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "ATQ", "value": 252 }, { "stat": "DEF", "value": 4 }], "moves": ["Boutefeu", "Os Ombre", "Osmerang", "Abri"] },
+            { "name": "Méga-Flagadoss", "englishName": "slowbro-mega", "types": ["Eau", "Psy"], "nature": "Discret", "ability": "Coque Armure", "item": "Flagadossite", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "ATQ SP", "value": 252 }, { "stat": "DEF", "value": 4 }], "moves": ["Distorsion", "Ébullition", "Choc Psy", "Lance-Flammes"] }
+          ]
+        },
+        {
+          "team_name": "Bulky Offense",
+          "team_id": "bulky_offense",
+          "members": [
+            { "name": "Tokorico", "englishName": "tapukoko", "types": ["Électrik", "Fée"], "nature": "Timide", "ability": "Créa-Élec", "item": "Ceinture Force", "evs": [{ "stat": "VIT", "value": 252 }, { "stat": "ATQ SP", "value": 252 }, { "stat": "PV", "value": 4 }], "moves": ["Tonnerre", "Éclat Magique", "Provoc", "Change Éclair"] },
+            { "name": "Méga-Léviator", "englishName": "gyarados-mega", "types": ["Eau", "Ténèbres"], "nature": "Prudent", "ability": "Intimidation", "item": "Léviatorite", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "DEF SP", "value": 150 }, { "stat": "VIT", "value": 106 }], "moves": ["Danse Draco", "Cascade", "Mâchouille", "Provoc"] },
+            { "name": "Ossatueur d'Alola", "englishName": "marowak-alola", "types": ["Feu", "Spectre"], "nature": "Rigide", "ability": "Paratonnerre", "item": "Masse Os", "evs": [{ "stat": "PV", "value": 248 }, { "stat": "ATQ", "value": 252 }, { "stat": "DEF SP", "value": 8 }], "moves": ["Boutefeu", "Os Ombre", "Osmerang", "Feu Follet"] }
+          ]
+        },
+        {
+          "team_name": "Stall Inflexible",
+          "team_id": "stall_inflexible",
+          "members": [
+            { "name": "Prédastérie", "englishName": "toxapex", "types": ["Poison", "Eau"], "nature": "Assuré", "ability": "Régé-Force", "item": "Boue Noire", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "DEF", "value": 252 }, { "stat": "DEF SP", "value": 4 }], "moves": ["Ébullition", "Toxik", "Soin", "Buée Noire"] },
+            { "name": "Porygon2", "englishName": "porygon2", "types": ["Normal"], "nature": "Calme", "ability": "Calque", "item": "Évoluroc", "evs": [{ "stat": "PV", "value": 252 }, { "stat": "DEF", "value": 120 }, { "stat": "DEF SP", "value": 136 }], "moves": ["Soin", "Toxik", "Laser Glace", "Tonnerre"] },
+            { "name": "Méga-Drattak", "englishName": "salamence-mega", "types": ["Dragon", "Vol"], "nature": "Rigide", "ability": "Peau Céleste", "item": "Drattakite", "evs": [{ "stat": "PV", "value": 244 }, { "stat": "DEF SP", "value": 148 }, { "stat": "VIT", "value": 116 }], "moves": ["Danse Draco", "Damoclès", "Atterrissage", "Clonage"] }
+          ]
+        }
+      ]
+    };
 
     /* ══════════════════════════════════════════════════════════════
        ÉQUIPES COMPÉTITIVES (VGC / Smogon)
@@ -2649,13 +2756,44 @@
       document.getElementById("analysis-aventure").innerHTML =
         renderTypeAnalysis("aventure", DATA_AVENTURE);
 
-      // ── Section 2 — Combat ──
-      document.getElementById("grid-combat").innerHTML =
-        DATA_COMBAT.map((p, i) => renderDetailCard(p, i, "combat")).join("");
+      // ── Section 2 — Arbre de Combat ──
+      const combatTeams = COMBAT_TEAMS.teams || [];
+      document.getElementById("grid-combat-teams").innerHTML =
+        combatTeams.map((team, i) => renderTeamBlock(team, i)).join("");
+      const totalCombatPokemon = combatTeams.reduce((sum, t) => sum + (t.members || []).length, 0);
       document.getElementById("count-combat").innerHTML =
-        `🔴 ${countFilled(DATA_COMBAT)} / 18`;
+        `🔴 ${totalCombatPokemon} Pokémon · ${combatTeams.length} équipes`;
+
+      // Populate combat selector
+      const selectorCombat = document.getElementById("team-selector-combat");
+      const counterCombat = document.getElementById("team-selector-combat-counter");
+      selectorCombat.innerHTML = combatTeams.map((team, i) =>
+        `<option value="${team.team_id}">${i + 1}. ${team.team_name}</option>`
+      ).join("");
+
+      function updateCombatCounter(selectedId) {
+        const idx = combatTeams.findIndex(t => t.team_id === selectedId);
+        if (counterCombat) counterCombat.textContent = `${idx + 1} / ${combatTeams.length}`;
+      }
+      updateCombatCounter(combatTeams[0].team_id);
+
+      // Show first team type analysis
       document.getElementById("analysis-combat").innerHTML =
-        renderTypeAnalysis("combat", DATA_COMBAT);
+        renderTypeAnalysis("combat_" + combatTeams[0].team_id, combatTeams[0].members || []);
+
+      selectorCombat.addEventListener("change", function () {
+        const selectedId = this.value;
+        document.querySelectorAll("#grid-combat-teams .team-block")
+          .forEach(el => el.classList.add("hidden"));
+        const target = document.getElementById("team-block-" + selectedId);
+        if (target) target.classList.remove("hidden");
+        updateCombatCounter(selectedId);
+        const activeTeam = combatTeams.find(t => t.team_id === selectedId);
+        if (activeTeam) {
+          document.getElementById("analysis-combat").innerHTML =
+            renderTypeAnalysis("combat_" + selectedId, activeTeam.members || []);
+        }
+      });
 
       // ── Section 3 — Compétitif ──
       // L'équipe d'origine (POKEMON_DATA.competitif) est affichée en premier,
@@ -2678,7 +2816,7 @@
 
       // ── Team Selector (dropdown) ──
       const selector = document.getElementById("team-selector");
-      const counter  = document.getElementById("team-selector-counter");
+      const counter = document.getElementById("team-selector-counter");
 
       // Populate <select> with one <option> per team
       selector.innerHTML = teams.map((team, i) =>
