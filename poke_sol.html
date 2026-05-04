@@ -1012,6 +1012,73 @@
         display: none;
       }
     }
+
+    /* ══════════════════════════════════════════
+       TEAM SELECTOR DROPDOWN
+    ══════════════════════════════════════════ */
+    .hidden {
+      display: none !important;
+    }
+
+    .team-selector-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .team-selector-label {
+      font-family: var(--font-h);
+      font-size: .9rem;
+      font-weight: 800;
+      color: var(--grey);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      white-space: nowrap;
+    }
+
+    #team-selector {
+      appearance: none;
+      -webkit-appearance: none;
+      background: var(--white)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23f5822a' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")
+        no-repeat right 1rem center / 1.1rem;
+      border: 2px solid rgba(112, 56, 248, .3);
+      border-radius: 50px;
+      padding: .65rem 3rem .65rem 1.4rem;
+      font-family: var(--font);
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--dark);
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+      box-shadow: 0 3px 12px rgba(112, 56, 248, .1);
+      min-width: 260px;
+      max-width: 100%;
+    }
+
+    #team-selector:focus {
+      outline: none;
+      border-color: rgba(112, 56, 248, .7);
+      box-shadow: 0 0 0 3px rgba(112, 56, 248, .15), 0 3px 12px rgba(112, 56, 248, .2);
+    }
+
+    #team-selector:hover {
+      border-color: rgba(112, 56, 248, .55);
+    }
+
+    .team-selector-counter {
+      font-size: .75rem;
+      font-weight: 800;
+      color: rgba(112, 56, 248, .8);
+      background: rgba(112, 56, 248, .08);
+      border: 1px solid rgba(112, 56, 248, .2);
+      border-radius: 50px;
+      padding: .3rem .8rem;
+      white-space: nowrap;
+    }
   </style>
 </head>
 
@@ -1087,6 +1154,16 @@
         <div class="pokeball-counter" id="count-competitif">⚪ 0 / 18</div>
       </div>
       <div class="section-divider s3-divider"></div>
+
+      <!-- Team Selector -->
+      <div class="team-selector-wrapper">
+        <span class="team-selector-label">⚔️ Équipe :</span>
+        <select id="team-selector" aria-label="Sélectionner une équipe compétitive">
+          <!-- Options injectées dynamiquement par JS -->
+        </select>
+        <span class="team-selector-counter" id="team-selector-counter">1 / 10</span>
+      </div>
+
       <div class="teams-container" id="grid-competitif"></div>
       <div class="type-analysis" id="analysis-competitif"></div>
     </section>
@@ -2546,8 +2623,10 @@
       // Index global pour les checklists (unique par équipe × membre)
       const sectionKey = `competitif_${team.team_id}`;
       const cards = members.map((p, i) => renderDetailCard(p, i, sectionKey)).join("");
+      // Only the first team (index 0) is visible by default
+      const hiddenClass = teamIdx === 0 ? '' : ' hidden';
       return `
-    <div class="team-block" id="team-block-${team.team_id}">
+    <div class="team-block${hiddenClass}" id="team-block-${team.team_id}">
       <div class="team-header">
         <span class="team-header-icon">🏆</span>
         <span class="team-header-name">${team.team_name}</span>
@@ -2596,6 +2675,41 @@
       const allCompMembers = teams.flatMap(t => t.members || []);
       document.getElementById("analysis-competitif").innerHTML =
         renderTypeAnalysis("competitif", allCompMembers);
+
+      // ── Team Selector (dropdown) ──
+      const selector = document.getElementById("team-selector");
+      const counter  = document.getElementById("team-selector-counter");
+
+      // Populate <select> with one <option> per team
+      selector.innerHTML = teams.map((team, i) =>
+        `<option value="${team.team_id}">${i + 1}. ${team.team_name}</option>`
+      ).join("");
+
+      // Update counter on change
+      function updateTeamCounter(selectedId) {
+        const idx = teams.findIndex(t => t.team_id === selectedId);
+        if (counter) counter.textContent = `${idx + 1} / ${teams.length}`;
+      }
+      updateTeamCounter(teams[0].team_id);
+
+      // Change handler: hide all, show selected
+      selector.addEventListener("change", function () {
+        const selectedId = this.value;
+        // Hide all team blocks
+        document.querySelectorAll("#grid-competitif .team-block")
+          .forEach(el => el.classList.add("hidden"));
+        // Show the selected one
+        const target = document.getElementById("team-block-" + selectedId);
+        if (target) target.classList.remove("hidden");
+        // Update counter
+        updateTeamCounter(selectedId);
+        // Update type analysis for the active team only
+        const activeTeam = teams.find(t => t.team_id === selectedId);
+        if (activeTeam) {
+          document.getElementById("analysis-competitif").innerHTML =
+            renderTypeAnalysis("competitif_" + selectedId, activeTeam.members || []);
+        }
+      });
 
       // ── Day/Night clock ──
       updateDayNight();
